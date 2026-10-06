@@ -10,7 +10,7 @@ from pathlib import Path
 
 import requests
 
-ROUTES = []  # ex. ["Pyrenees", "Av_de_Clichy", "Voie_Mazas"]
+ROUTES = ["Bd_Barbes", "Av_Pdt_Kennedy", "Av_Grande_Armee"]
 DATE_DEBUT = "2026-03-01"
 DATE_FIN = "2026-09-01"  # exclue
 
