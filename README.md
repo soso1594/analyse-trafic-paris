@@ -17,10 +17,12 @@ Comment le trafic évolue-t-il selon l'heure et le jour (semaine / week-end) sur
   - Fuseau horaire, doublons, valeurs aberrantes de `q` : (j'en saurais plus , à compléter après M2 et M3.)
 
 ## Résultats
-3 à 5 résultats chiffrés, avec 1 ou 2 graphiques.
+On a aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries différentes pour 22 capteurs (6 pour Bd_Barbes, 3 pour Av_Pdt_Kennedy, 4 pour Av_Grande_Armee). L'occupation `k` compte 20 séries pour 22 capteurs. Egalement les groupes partagés ont entre 94,6 % et 99,8 % de mesures présentes : ce ne sont pas des capteurs vides. Le plus grand groupe (4 capteurs de Bd_Barbes : 1630, 1632, 1634, 1636) est formé de tronçons consécutifs.
+
+Conclusion: le débit semble recopié entre tronçons voisins. Une moyenne de débit par axe compterait plusieurs fois la même mesure, surtout sur Bd_Barbes. 
 
 ## Limites
-Ce que les données ne permettent pas de dire.
+Les données ne disent pas pourquoi ce débit est partagé.
 
 ## Lancer le projet
 ```bash
