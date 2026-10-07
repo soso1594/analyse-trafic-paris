@@ -21,6 +21,10 @@ On a aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries diffé
 
 Conclusion: le débit semble recopié entre tronçons voisins. Une moyenne de débit par axe compterait plusieurs fois la même mesure, surtout sur Bd_Barbes. 
 
+Sur la gestion des colonnes inutiles, on a que chaque capteur a 1 carrefour amont et au maximum 1 carrefours aval sur la période. `t_utc` et `t_paris` désignent le même instant. les colonnes de carrefours décrivent la géométrie du réseau, et `iu_ac` suffit à identifier un tronçon, je peux donc  les supprimer
+
+Ainsi, je garde `t_paris` pour les analyses horaires et supprime `t_utc`, qui contient la même information.
+
 ## Limites
 Les données ne disent pas pourquoi ce débit est partagé.
 
