@@ -23,7 +23,7 @@ Comment le trafic évolue-t-il selon l'heure et le jour (semaine / week-end) sur
   - **Doublons cachés** : aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries différentes pour 22 tronçons (6 sur 12 pour Bd_Barbes, 3 sur 6 pour Av_Pdt_Kennedy, 4 sur 4 pour Av_Grande_Armee). Le débit semble recopié entre tronçons voisins ; `groupe_q` repère ces groupes.
   - **Capteur 5258 (Av_Grande_Armee)** : `k` est absent sur 98 % de ses heures.
   - **Interpolation** : limitée aux trous de 3 h ou moins entre deux mesures réelles ; les longues pannes restent vides. Les valeurs reconstituées sont marquées (`q_comble`, `k_comble`) et `q`, `k` d'origine sont conservés.
-    - **Valeurs aberrantes de `q`** : l'IQR par capteur signale 580 valeurs sur 92 486, surtout des nuits calmes (534 trop basses, 78 % entre 3 h et 5 h), que je garde. Seules 2 valeurs à 5 421,95 véhicules/heure, physiquement incohérentes (non entières, très au-dessus du 99,9e percentile à 1 392), sont mises à `NaN`.
+  - **Valeurs aberrantes de `q`** : l'IQR par capteur signale 580 valeurs sur 92 486, surtout des nuits calmes (534 trop basses, 78 % entre 3 h et 5 h), que je garde. Seules 2 valeurs à 5 421,95 véhicules/heure, physiquement incohérentes (non entières, très au-dessus du 99,9e percentile à 1 392), sont mises à `NaN`.
   - **Encodage** : `etat_trafic` est encodé en ordinal (l'occupation médiane `k` augmente de Fluide à Bloqué), avec `Inconnu` en `NaN` ; `etat_barre` est en one-hot.
   - **Variables temporelles** (heure, jour de la semaine, week-end, mois) calculées en heure de Paris.
 
