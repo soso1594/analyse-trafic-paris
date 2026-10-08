@@ -1,6 +1,6 @@
 # Trafic routier à Paris : Bd Barbes, Av. du Président Kennedy, Av. de la Grande Armée
 
-> > Projet du module Analyse et Transformation de Données (MSc DM2). Avancement : chargement (M1) et nettoyage (M2) terminés, transformation et statistiques (M3) en cours.
+> Projet du module Analyse et Transformation de Données (MSc DM2). Avancement : chargement (M1), nettoyage (M2) et transformation (M3) terminés ; analyse finale en cours.
 
 ## La question
 Comment le trafic évolue-t-il selon l'heure et le jour (semaine / week-end) sur mes trois axes parisiens de nature différente : un boulevard urbain, un axe de transit et une entrée d'agglomération ?
@@ -23,6 +23,9 @@ Comment le trafic évolue-t-il selon l'heure et le jour (semaine / week-end) sur
   - **Doublons cachés** : aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries différentes pour 22 tronçons (6 sur 12 pour Bd_Barbes, 3 sur 6 pour Av_Pdt_Kennedy, 4 sur 4 pour Av_Grande_Armee). Le débit semble recopié entre tronçons voisins ; `groupe_q` repère ces groupes.
   - **Capteur 5258 (Av_Grande_Armee)** : `k` est absent sur 98 % de ses heures.
   - **Interpolation** : limitée aux trous de 3 h ou moins entre deux mesures réelles ; les longues pannes restent vides. Les valeurs reconstituées sont marquées (`q_comble`, `k_comble`) et `q`, `k` d'origine sont conservés.
+    - **Valeurs aberrantes de `q`** : l'IQR par capteur signale 580 valeurs sur 92 486, surtout des nuits calmes (534 trop basses, 78 % entre 3 h et 5 h), que je garde. Seules 2 valeurs à 5 421,95 véhicules/heure, physiquement incohérentes (non entières, très au-dessus du 99,9e percentile à 1 392), sont mises à `NaN`.
+  - **Encodage** : `etat_trafic` est encodé en ordinal (l'occupation médiane `k` augmente de Fluide à Bloqué), avec `Inconnu` en `NaN` ; `etat_barre` est en one-hot.
+  - **Variables temporelles** (heure, jour de la semaine, week-end, mois) calculées en heure de Paris.
 
 ## Résultats
 On a aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries différentes pour 22 capteurs (6 pour Bd_Barbes, 3 pour Av_Pdt_Kennedy, 4 pour Av_Grande_Armee). L'occupation `k` compte 20 séries pour 22 capteurs. Egalement les groupes partagés ont entre 94,6 % et 99,8 % de mesures présentes : ce ne sont pas des capteurs vides. Le plus grand groupe (4 capteurs de Bd_Barbes : 1630, 1632, 1634, 1636) est formé de tronçons consécutifs.
@@ -42,13 +45,16 @@ Le débit étant partagé entre tronçons, une moyenne par axe risque de compter
 `k` est inutilisable sur le capteur 5258.
 On a trois axes seulement donc les conclusions ne se généralisent pas à tout Paris.
 
+Le 12 avril, trois capteurs d'Av_Pdt_Kennedy partagent un débit allant jusqu'à 1 856 véhicules/heure alors que leur occupation va de 0 % à près de 97 % : la valeur est conservée (sous 2 000) mais reste incohérente. Les données ne permettent pas de dire lequel est juste, je le signale plutôt que d'inventer une règle.
+
 ## Lancer le projet
 ```bash
 pip install -r requirements.txt
 python download_data.py
 ```
-Puis exécuter les notebooks dans l'ordre : `01_exploration.ipynb`, `02_nettoyage.ipynb` (écrit `data/processed/comptages_propres.parquet`, non versionné), puis les suivants.
+Puis exécuter les notebooks dans l'ordre : `01_exploration.ipynb`, `02_nettoyage.ipynb` (écrit `data/processed/comptages_propres.parquet`), `03_transformation.ipynb` (écrit `data/processed/comptages_transformes.parquet`), puis l'analyse finale.
 
 
 ## Utilisation de l'IA
 J'ai utilisé Claude pour résoudre des problèmes d'installation (Git, e-mail GitHub, kernel Jupyter), corrigé les parties de codes qui ne marchaient pas.
+J'ai vérifié ses affirmations avec mes sorties : par exemple, mon texte disait que les valeurs trop hautes de l'IQR étaient « dispersées », ce que le calcul des jours les plus touchés a contredit (12 sur 46 tombent le même jour).
