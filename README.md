@@ -1,6 +1,6 @@
 # Trafic routier à Paris : Bd Barbes, Av. du Président Kennedy, Av. de la Grande Armée
 
-> Projet du module Analyse et Transformation de Données (MSc DM2). Analyse en cours : M1 terminé, M2 en cours.
+> > Projet du module Analyse et Transformation de Données (MSc DM2). Avancement : chargement (M1) et nettoyage (M2) terminés, transformation et statistiques (M3) en cours.
 
 ## La question
 Comment le trafic évolue-t-il selon l'heure et le jour (semaine / week-end) sur mes trois axes parisiens de nature différente : un boulevard urbain, un axe de transit et une entrée d'agglomération ?
@@ -9,12 +9,20 @@ Comment le trafic évolue-t-il selon l'heure et le jour (semaine / week-end) sur
 - **Source** : comptages routiers permanents de la Ville de Paris (boucles électromagnétiques, mesures horaires).
 - **Axes** : Bd_Barbes (12 tronçons), Av_Pdt_Kennedy (6), Av_Grande_Armee (4).
 - **Période** : du 1er mars au 31 août 2026.
-- **Volume** : 95 960 lignes, 11 colonnes (~12,6 Mo).
+- **Volume** : 95 960 lignes brutes, 22 tronçons (12 + 6 + 4), 4 416 heures attendues par tronçon..
 - **Pièges rencontrés** :
   Pour l'instant ,
   - `k` (taux d'occupation) est manquant dans ~9,6 % des lignes, `q` (débit) dans ~3,6 %.
   - `etat_trafic = Inconnu` correspond exactement aux lignes où `k` est manquant (9 169 lignes) : c'est une valeur manquante déguisée en texte.
-  - Fuseau horaire, doublons, valeurs aberrantes de `q` : (j'en saurais plus , à compléter après M2 et M3.)
+  - Fuseau horaire, doublons, valeurs aberrantes de `q` 
+  - **Pièges rencontrés et traitements** :
+  - **Fuseau horaire** : les dates sont en UTC (suffixe `+00:00`), ce que j'ai vérifié sur le 29 mars (23 h en heure de Paris, 24 h en UTC). Elles sont converties en heure de Paris.
+  - **Valeurs manquantes** : `q` manque dans 3,6 % des lignes et `k` dans 9,6 %. Les 3 202 lignes `Invalide` ont `q` et `k` vides ; `Barré` (100 lignes) garde un débit renseigné.
+  - **`Inconnu` = `k` manquant** : les 9 169 lignes `etat_trafic = Inconnu` sont exactement celles où `k` est vide.
+  - **Heures absentes du fichier** : 52 heures manquent pour tous les capteurs, en 4 épisodes (24 h, 24 h, 3 h, 1 h). J'ai reconstruit une grille complète capteur × heure (97 152 lignes) avant toute interpolation.
+  - **Doublons cachés** : aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries différentes pour 22 tronçons (6 sur 12 pour Bd_Barbes, 3 sur 6 pour Av_Pdt_Kennedy, 4 sur 4 pour Av_Grande_Armee). Le débit semble recopié entre tronçons voisins ; `groupe_q` repère ces groupes.
+  - **Capteur 5258 (Av_Grande_Armee)** : `k` est absent sur 98 % de ses heures.
+  - **Interpolation** : limitée aux trous de 3 h ou moins entre deux mesures réelles ; les longues pannes restent vides. Les valeurs reconstituées sont marquées (`q_comble`, `k_comble`) et `q`, `k` d'origine sont conservés.
 
 ## Résultats
 On a aucune ligne dupliquée, mais le débit `q` ne compte que 13 séries différentes pour 22 capteurs (6 pour Bd_Barbes, 3 pour Av_Pdt_Kennedy, 4 pour Av_Grande_Armee). L'occupation `k` compte 20 séries pour 22 capteurs. Egalement les groupes partagés ont entre 94,6 % et 99,8 % de mesures présentes : ce ne sont pas des capteurs vides. Le plus grand groupe (4 capteurs de Bd_Barbes : 1630, 1632, 1634, 1636) est formé de tronçons consécutifs.
@@ -25,15 +33,22 @@ Sur la gestion des colonnes inutiles, on a que chaque capteur a 1 carrefour amon
 
 Ainsi, je garde `t_paris` pour les analyses horaires et supprime `t_utc`, qui contient la même information.
 
+
+
 ## Limites
 Les données ne disent pas pourquoi ce débit est partagé.
+Les données ne disent pas pourquoi aussi un tronçon est `Invalide`, ni pourquoi le débit est identique sur des tronçons voisins.
+Le débit étant partagé entre tronçons, une moyenne par axe risque de compter plusieurs fois la même mesure : je tiens compte de `groupe_q`.
+`k` est inutilisable sur le capteur 5258.
+On a trois axes seulement donc les conclusions ne se généralisent pas à tout Paris.
 
 ## Lancer le projet
 ```bash
 pip install -r requirements.txt
 python download_data.py
 ```
-Puis exécuter les notebooks dans l'ordre.
+Puis exécuter les notebooks dans l'ordre : `01_exploration.ipynb`, `02_nettoyage.ipynb` (écrit `data/processed/comptages_propres.parquet`, non versionné), puis les suivants.
+
 
 ## Utilisation de l'IA
 J'ai utilisé Claude pour résoudre des problèmes d'installation (Git, e-mail GitHub, kernel Jupyter), corrigé les parties de codes qui ne marchaient pas.
